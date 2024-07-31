@@ -1,7 +1,8 @@
-package main
+package always_run
 
-deny[msg] {
-    task := input.tasks[_]
-    task.always_run
-    msg = sprintf("always_run is not allowed in task '%s'. Use check_mode instead.", [task.name])
+# Entry point for the policy
+deny[{"message": msg}] {
+    # Check if the input has the 'always_run' key
+    input.always_run != null
+    msg := "always_run is not allowed, instead use check_mode."
 }
