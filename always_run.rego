@@ -1,8 +1,10 @@
-package always_run
+package yaml.check
 
-# Entry point for the policy
-deny[{"message": msg}] {
-    # Check if the input has the 'always_run' key
-    input.always_run != null
-    msg := "always_run is not allowed, instead use check_mode."
+# Input will be a YAML file parsed into JSON
+deny[msg] {
+    # Check if 'always_run' key is present in the input
+    input.always_run
+
+    # Define the denial message
+    msg := "always_run is not allowed, instead use check_mode"
 }
