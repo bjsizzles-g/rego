@@ -1,59 +1,36 @@
 .
 package playbook.validation
 
+# List of deprecated modules
+deprecated_modules = [
+    "old_module",
+    "legacy_module",
+    "deprecated_module_v1",
+    "outdated_module"
+]
 
-package playbook.validation
-
-# Deny if 'always_run' is found anywhere in the input
+# Deny if a deprecated module is found
 deny[msg] {
-    some i
-    contains_always_run(input[i])
-    msg := "Usage of 'always_run' is denied."
+    is_object(input)
+    contains_deprecated_module(input, msg)
 }
 
-# Deny if 'become_user: root' is found anywhere in the input
-deny[msg] {
-    some i
-    contains_become_user_root(input[i])
-    msg := "Usage of 'become_user: root' is denied."
-}
-
-# Helper function to recursively check for 'always_run'
-contains_always_run(x) {
+# Helper function to check if any module is deprecated
+contains_deprecated_module(x, msg) {
     is_object(x)
     some key
-    x[key] == true
-    key == "always_run"
+    x[key].value == deprecated_modules[_]
+    msg := sprintf("Deprecated module '%v' found at line '%v'.", [x[key].value, x[key].line])
 }
 
-contains_always_run(x) {
+contains_deprecated_module(x, msg) {
     is_array(x)
     some i
-    contains_always_run(x[i])
+    contains_deprecated_module(x[i], msg)
 }
 
-contains_always_run(x) {
+contains_deprecated_module(x, msg) {
     is_object(x)
     some key
-    contains_always_run(x[key])
-}
-
-# Helper function to recursively check for 'become_user: root'
-contains_become_user_root(x) {
-    is_object(x)
-    some key
-    x[key] == "root"
-    key == "become_user"
-}
-
-contains_become_user_root(x) {
-    is_array(x)
-    some i
-    contains_become_user_root(x[i])
-}
-
-contains_become_user_root(x) {
-    is_object(x)
-    some key
-    contains_become_user_root(x[key])
+    contains_deprecated_module(x[key], msg)
 }
