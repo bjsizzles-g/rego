@@ -1,26 +1,59 @@
 .
 package playbook.validation
 
+
+package playbook.validation
+
+# Deny if 'always_run' is found anywhere in the input
 deny[msg] {
-    # Check tasks directly under input
     some i
-    input.tasks[i].always_run == true
-    msg := sprintf("Usage of 'always_run' is denied in task %v.", [i])
+    contains_always_run(input[i])
+    msg := "Usage of 'always_run' is denied."
 }
 
+# Deny if 'become_user: root' is found anywhere in the input
 deny[msg] {
-    # Check tasks within roles
-    some r
-    some t
-    input.roles[r].tasks[t].always_run == true
-    msg := sprintf("Usage of 'always_run' is denied in role %v, task %v.", [r, t])
+    some i
+    contains_become_user_root(input[i])
+    msg := "Usage of 'become_user: root' is denied."
 }
 
-deny[msg] {
-    # Check tasks in roles with nested dictionaries or lists
-    some r
-    role_tasks := input.roles[r].tasks
+# Helper function to recursively check for 'always_run'
+contains_always_run(x) {
+    is_object(x)
+    some key
+    x[key] == true
+    key == "always_run"
+}
+
+contains_always_run(x) {
+    is_array(x)
     some i
-    role_tasks[i].always_run == true
-    msg := sprintf("Usage of 'always_run' is denied in role %v, nested task %v.", [r, i])
+    contains_always_run(x[i])
+}
+
+contains_always_run(x) {
+    is_object(x)
+    some key
+    contains_always_run(x[key])
+}
+
+# Helper function to recursively check for 'become_user: root'
+contains_become_user_root(x) {
+    is_object(x)
+    some key
+    x[key] == "root"
+    key == "become_user"
+}
+
+contains_become_user_root(x) {
+    is_array(x)
+    some i
+    contains_become_user_root(x[i])
+}
+
+contains_become_user_root(x) {
+    is_object(x)
+    some key
+    contains_become_user_root(x[key])
 }
