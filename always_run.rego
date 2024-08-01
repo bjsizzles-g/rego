@@ -1,11 +1,11 @@
-
+.
 package playbook.validation
 
 deny[msg] {
     # Check tasks directly under input
     some i
     input.tasks[i].always_run == true
-    msg := "Usage of 'always_run' is denied in task " + tostring(i) + "."
+    msg := sprintf("Usage of 'always_run' is denied in task %v.", [i])
 }
 
 deny[msg] {
@@ -13,7 +13,7 @@ deny[msg] {
     some r
     some t
     input.roles[r].tasks[t].always_run == true
-    msg := "Usage of 'always_run' is denied in role " + tostring(r) + ", task " + tostring(t) + "."
+    msg := sprintf("Usage of 'always_run' is denied in role %v, task %v.", [r, t])
 }
 
 deny[msg] {
@@ -22,5 +22,5 @@ deny[msg] {
     role_tasks := input.roles[r].tasks
     some i
     role_tasks[i].always_run == true
-    msg := "Usage of 'always_run' is denied in role " + tostring(r) + ", nested task " + tostring(i) + "."
+    msg := sprintf("Usage of 'always_run' is denied in role %v, nested task %v.", [r, i])
 }
